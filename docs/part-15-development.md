@@ -173,6 +173,36 @@ Not yet verified in this repository session:
 - visual QA against live running APK
 - manual capture of runtime screenshots
 
+## Runtime Screenshots
+
+First real runtime screenshots from the emulator were added to the repository:
+
+- `docs/assets/runtime-screenshots/01-home-runtime.png`
+- `docs/assets/runtime-screenshots/02-specialists-runtime.png`
+- `docs/assets/runtime-screenshots/03-slot-selection-runtime.png`
+- `docs/assets/runtime-screenshots/04-booking-confirmation-runtime.png`
+- `docs/assets/runtime-screenshots/05-bookings-runtime.png`
+- `docs/assets/runtime-screenshots/06-profile-favorites-runtime.png`
+- `docs/assets/runtime-screenshots/07-auth-runtime.png`
+
+These screenshots are useful for:
+- part 15 evidence in Notion
+- comparison against final Figma frames
+- tracking visible UI/UX issues before the next polish pass
+
+## Visible UI/UX Issues From The First Runtime Pass
+
+The first runtime screenshots already show several rough spots that should be fixed next:
+
+- profile tabs break layout on narrow width, especially `Избранное`
+- settings list bottom area is clipped in the profile/favorites screen
+- bookings screen content is too dense and visually overloaded
+- auth screen has a stray circular element on the left side near the primary button
+- some screens need tighter spacing and better vertical rhythm to match Figma
+- slot-selection layout is technically working, but still looks too raw compared with the final design
+
+These issues are not blockers for the MVP flow itself, but they are real polish tasks for the next UI iteration.
+
 ## Problems and Decisions
 
 ### Decision 1: Build the Android project in the repository root

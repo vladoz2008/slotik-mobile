@@ -44,8 +44,18 @@ Status date: `2026-06-11`
 
 ## Still Needs Runtime QA
 
-- [ ] Full booking flow tested on a running emulator
-- [ ] Cancellation visually checked in UI
+- [x] Full booking flow tested on a running emulator
+- [x] Cancellation visually checked in UI
 - [ ] Search empty state visually checked in UI
-- [ ] Favorite toggle visually checked in UI
+- [x] Favorite toggle visually checked in UI
 - [ ] Layout compared screen-by-screen with final Figma frames
+
+## Runtime Evidence
+
+- [x] Home runtime screenshot saved
+- [x] Specialists runtime screenshot saved
+- [x] Slot-selection runtime screenshot saved
+- [x] Booking-confirmation runtime screenshot saved
+- [x] Bookings runtime screenshot saved
+- [x] Profile/favorites runtime screenshot saved
+- [x] Auth runtime screenshot saved
