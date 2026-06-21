@@ -4,42 +4,51 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.slotik.mobile.domain.model.ProfileSection
 import com.slotik.mobile.presentation.features.auth.AuthScreen
+import com.slotik.mobile.presentation.features.auth.AuthViewModel
 import com.slotik.mobile.presentation.features.booking.BookingConfirmationScreen
+import com.slotik.mobile.presentation.features.booking.BookingViewModel
 import com.slotik.mobile.presentation.features.booking.SlotSelectionScreen
+import com.slotik.mobile.presentation.features.bookings.BookingsViewModel
 import com.slotik.mobile.presentation.features.bookings.ProfileScreen
+import com.slotik.mobile.presentation.features.home.HomeViewModel
 import com.slotik.mobile.presentation.features.home.HomeScreen
 import com.slotik.mobile.presentation.features.onboarding.OnboardingScreen
 import com.slotik.mobile.presentation.features.specialists.EmptySpecialistsScreen
 import com.slotik.mobile.presentation.features.specialists.SpecialistsScreen
+import com.slotik.mobile.presentation.features.specialists.SpecialistsViewModel
 import com.slotik.mobile.presentation.navigation.SlotikDestination
 
 @Composable
-fun SlotikApp(
-    state: SlotikScreenState,
-    viewModel: SlotikViewModel,
-    modifier: Modifier = Modifier,
-) {
+fun SlotikApp(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val authViewModel: AuthViewModel = viewModel(factory = AuthViewModel.factory(context))
+    val authState by authViewModel.state.collectAsStateWithLifecycle()
+
     when {
-        !state.onboardingCompleted -> OnboardingScreen(onContinue = viewModel::completeOnboarding)
-        !state.isAuthorized -> AuthScreen(
-            authMode = state.authMode,
-            email = state.email,
-            password = state.password,
-            canSubmit = state.canSubmitAuth,
-            onAuthModeChange = viewModel::updateAuthMode,
-            onEmailChange = viewModel::updateEmail,
-            onPasswordChange = viewModel::updatePassword,
-            onSubmit = viewModel::submitAuth,
+        !authState.onboardingCompleted -> OnboardingScreen(
+            onContinue = authViewModel::completeOnboarding,
+        )
+        !authState.isAuthorized -> AuthScreen(
+            authMode = authState.authMode,
+            email = authState.email,
+            password = authState.password,
+            canSubmit = authState.canSubmit,
+            onAuthModeChange = authViewModel::updateAuthMode,
+            onEmailChange = authViewModel::updateEmail,
+            onPasswordChange = authViewModel::updatePassword,
+            onSubmit = authViewModel::submit,
         )
         else -> SlotikAuthenticatedApp(
-            state = state,
-            viewModel = viewModel,
+            onSignOut = authViewModel::signOut,
             modifier = modifier,
         )
     }
@@ -47,14 +56,31 @@ fun SlotikApp(
 
 @Composable
 private fun SlotikAuthenticatedApp(
-    state: SlotikScreenState,
-    viewModel: SlotikViewModel,
+    onSignOut: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
+
+    val homeViewModel: HomeViewModel = viewModel(factory = HomeViewModel.factory(context))
+    val specialistsViewModel: SpecialistsViewModel = viewModel(
+        factory = SpecialistsViewModel.factory(context),
+    )
+    val bookingViewModel: BookingViewModel = viewModel(factory = BookingViewModel.factory(context))
+    val bookingsViewModel: BookingsViewModel = viewModel(
+        factory = BookingsViewModel.factory(context),
+    )
+
+    val homeState by homeViewModel.state.collectAsStateWithLifecycle()
+    val specialistsState by specialistsViewModel.state.collectAsStateWithLifecycle()
+    val bookingState by bookingViewModel.state.collectAsStateWithLifecycle()
+    val bookingsState by bookingsViewModel.state.collectAsStateWithLifecycle()
+
     val navController = rememberNavController()
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = remember(backStack) {
-        SlotikDestination.entries.firstOrNull { it.route == backStack?.destination?.route } ?: SlotikDestination.HOME
+        SlotikDestination.entries.firstOrNull {
+            it.route == backStack?.destination?.route
+        } ?: SlotikDestination.HOME
     }
 
     NavHost(
@@ -64,49 +90,43 @@ private fun SlotikAuthenticatedApp(
     ) {
         composable(SlotikDestination.HOME.route) {
             HomeScreen(
-                categories = state.categories,
-                nextBooking = state.nextBooking,
-                featuredSpecialists = state.featuredSpecialists,
+                categories = homeState.categories,
+                nextBooking = homeState.nextBooking,
+                featuredSpecialists = homeState.featuredSpecialists,
                 onOpenSearch = { navController.navigate(SlotikDestination.SPECIALISTS.route) },
                 onOpenSpecialist = { specialistId ->
-                    viewModel.selectSpecialist(specialistId)
+                    bookingViewModel.selectSpecialist(specialistId)
                     navController.navigate(SlotikDestination.SLOT_SELECTION.route)
                 },
                 onOpenBookingDetails = { navController.navigate(SlotikDestination.BOOKINGS.route) },
                 onNavigate = { destination ->
-                    navController.navigate(destination.route) {
-                        launchSingleTop = true
-                    }
+                    navController.navigate(destination.route) { launchSingleTop = true }
                 },
             )
         }
 
         composable(SlotikDestination.SPECIALISTS.route) {
-            if (state.filteredSpecialists.isEmpty()) {
+            if (specialistsState.filteredSpecialists.isEmpty()) {
                 EmptySpecialistsScreen(
-                    onBackToSearch = viewModel::clearSearchQuery,
-                    onResetFilters = viewModel::clearSearchQuery,
+                    onBackToSearch = specialistsViewModel::clearSearchQuery,
+                    onResetFilters = specialistsViewModel::clearSearchQuery,
                     onNavigate = { destination ->
-                        navController.navigate(destination.route) {
-                            launchSingleTop = true
-                        }
+                        navController.navigate(destination.route) { launchSingleTop = true }
                     },
                 )
             } else {
                 SpecialistsScreen(
-                    searchQuery = state.searchQuery,
-                    specialists = state.filteredSpecialists,
-                    favoriteIds = state.favoriteSpecialists.map { it.id }.toSet(),
-                    onSearchChange = viewModel::updateSearchQuery,
-                    onFavoriteClick = viewModel::toggleFavorite,
+                    searchQuery = specialistsState.searchQuery,
+                    specialists = specialistsState.filteredSpecialists,
+                    favoriteIds = specialistsState.favoriteIds,
+                    onSearchChange = specialistsViewModel::updateSearchQuery,
+                    onFavoriteClick = specialistsViewModel::toggleFavorite,
                     onSpecialistClick = { specialistId ->
-                        viewModel.selectSpecialist(specialistId)
+                        bookingViewModel.selectSpecialist(specialistId)
                         navController.navigate(SlotikDestination.SLOT_SELECTION.route)
                     },
                     onNavigate = { destination ->
-                        navController.navigate(destination.route) {
-                            launchSingleTop = true
-                        }
+                        navController.navigate(destination.route) { launchSingleTop = true }
                     },
                 )
             }
@@ -114,27 +134,27 @@ private fun SlotikAuthenticatedApp(
 
         composable(SlotikDestination.SLOT_SELECTION.route) {
             SlotSelectionScreen(
-                specialist = state.selectedSpecialist,
-                slots = state.availableSlots,
-                selectedSlot = state.selectedSlot,
+                specialist = bookingState.selectedSpecialist,
+                slots = bookingState.availableSlots,
+                selectedSlot = bookingState.selectedSlot,
                 onBack = { navController.popBackStack() },
-                onSelectSlot = viewModel::selectSlot,
+                onSelectSlot = bookingViewModel::selectSlot,
                 onContinue = { navController.navigate(SlotikDestination.BOOKING_CONFIRMATION.route) },
             )
         }
 
         composable(SlotikDestination.BOOKING_CONFIRMATION.route) {
             BookingConfirmationScreen(
-                specialist = state.selectedSpecialist,
-                selectedSlot = state.selectedSlot,
-                comment = state.bookingComment,
-                consent = state.bookingConsent,
-                canConfirm = state.canConfirmBooking,
+                specialist = bookingState.selectedSpecialist,
+                selectedSlot = bookingState.selectedSlot,
+                comment = bookingState.comment,
+                consent = bookingState.consent,
+                canConfirm = bookingState.canConfirm,
                 onBack = { navController.popBackStack() },
-                onCommentChange = viewModel::updateBookingComment,
-                onConsentChange = viewModel::updateBookingConsent,
+                onCommentChange = bookingViewModel::updateComment,
+                onConsentChange = bookingViewModel::updateConsent,
                 onConfirm = {
-                    viewModel.confirmBooking {
+                    bookingViewModel.confirmBooking { _ ->
                         navController.navigate(SlotikDestination.BOOKINGS.route) {
                             popUpTo(SlotikDestination.HOME.route)
                         }
@@ -146,44 +166,40 @@ private fun SlotikAuthenticatedApp(
         composable(SlotikDestination.BOOKINGS.route) {
             ProfileScreen(
                 currentRoute = currentRoute,
-                currentBookings = state.currentBookings,
-                bookingHistory = state.bookingHistory,
-                favoriteSpecialists = state.favoriteSpecialists,
+                currentBookings = bookingsState.currentBookings,
+                bookingHistory = bookingsState.bookingHistory,
+                favoriteSpecialists = bookingsState.favoriteSpecialists,
                 section = ProfileSection.BOOKINGS,
-                onSectionChange = viewModel::openBookingsSection,
-                onCancelBooking = viewModel::cancelBooking,
+                onSectionChange = bookingsViewModel::openSection,
+                onCancelBooking = bookingsViewModel::cancelBooking,
                 onOpenSpecialist = { specialistId ->
-                    viewModel.selectSpecialist(specialistId)
+                    bookingViewModel.selectSpecialist(specialistId)
                     navController.navigate(SlotikDestination.SLOT_SELECTION.route)
                 },
                 onNavigate = { destination ->
-                    navController.navigate(destination.route) {
-                        launchSingleTop = true
-                    }
+                    navController.navigate(destination.route) { launchSingleTop = true }
                 },
-                onSignOut = viewModel::signOut,
+                onSignOut = onSignOut,
             )
         }
 
         composable(SlotikDestination.PROFILE.route) {
             ProfileScreen(
                 currentRoute = currentRoute,
-                currentBookings = state.currentBookings,
-                bookingHistory = state.bookingHistory,
-                favoriteSpecialists = state.favoriteSpecialists,
-                section = state.profileSection,
-                onSectionChange = viewModel::openBookingsSection,
-                onCancelBooking = viewModel::cancelBooking,
+                currentBookings = bookingsState.currentBookings,
+                bookingHistory = bookingsState.bookingHistory,
+                favoriteSpecialists = bookingsState.favoriteSpecialists,
+                section = bookingsState.activeSection,
+                onSectionChange = bookingsViewModel::openSection,
+                onCancelBooking = bookingsViewModel::cancelBooking,
                 onOpenSpecialist = { specialistId ->
-                    viewModel.selectSpecialist(specialistId)
+                    bookingViewModel.selectSpecialist(specialistId)
                     navController.navigate(SlotikDestination.SLOT_SELECTION.route)
                 },
                 onNavigate = { destination ->
-                    navController.navigate(destination.route) {
-                        launchSingleTop = true
-                    }
+                    navController.navigate(destination.route) { launchSingleTop = true }
                 },
-                onSignOut = viewModel::signOut,
+                onSignOut = onSignOut,
             )
         }
     }
