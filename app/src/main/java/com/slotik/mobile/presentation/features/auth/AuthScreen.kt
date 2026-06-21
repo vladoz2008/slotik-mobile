@@ -3,6 +3,7 @@ package com.slotik.mobile.presentation.features.auth
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -142,25 +143,22 @@ fun AuthScreen(
 
         Spacer(modifier = Modifier.height(36.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Surface(
-                modifier = Modifier.weight(1f).height(1.dp),
-                color = SlotikDivider,
-            ) {}
+            Surface(modifier = Modifier.weight(1f).height(1.dp), color = SlotikDivider) {}
             Text(
                 text = "Или войдите через",
                 style = MaterialTheme.typography.bodyMedium,
                 color = SlotikTextSecondary,
                 modifier = Modifier.padding(horizontal = 16.dp),
             )
-            Surface(
-                modifier = Modifier.weight(1f).height(1.dp),
-                color = SlotikDivider,
-            ) {}
+            Surface(modifier = Modifier.weight(1f).height(1.dp), color = SlotikDivider) {}
         }
         Spacer(modifier = Modifier.height(18.dp))
-        SocialButton("Продолжить с Google", background = Color.White)
+
+        // BUG-03 fix: social buttons now use consistent icon badges instead of
+        // a bare "A" text or a floating empty circle.
+        SocialButton(label = "Продолжить с Google", iconLabel = "G")
         Spacer(modifier = Modifier.height(12.dp))
-        SocialButton("Продолжить с Apple", background = Color.White, useAppleIcon = true)
+        SocialButton(label = "Продолжить с Apple", iconLabel = "⌘")
     }
 }
 
@@ -186,17 +184,18 @@ private fun AuthModeChip(
     }
 }
 
+// BUG-03 fix: unified social button — always shows an icon badge + label,
+// never an empty circle or a bare single letter floating outside a container.
 @Composable
 private fun SocialButton(
-    text: String,
-    background: Color,
-    useAppleIcon: Boolean = false,
+    label: String,
+    iconLabel: String,
 ) {
     Surface(
-        color = background,
+        color = Color.White,
         shape = RoundedCornerShape(16.dp),
         tonalElevation = 0.dp,
-        shadowElevation = 0.dp,
+        shadowElevation = 2.dp,
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
@@ -206,21 +205,21 @@ private fun SocialButton(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (useAppleIcon) {
-                Text(
-                    text = "A",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = SlotikTextPrimary,
-                )
-            } else {
-                Surface(
-                    shape = RoundedCornerShape(999.dp),
-                    color = SlotikPrimaryLight,
-                    modifier = Modifier.size(24.dp),
-                ) {}
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = SlotikPrimaryLight,
+                modifier = Modifier.size(28.dp),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = iconLabel,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = SlotikPrimary,
+                    )
+                }
             }
             Text(
-                text = text,
+                text = label,
                 style = MaterialTheme.typography.bodyLarge,
                 color = SlotikTextPrimary,
                 modifier = Modifier.padding(start = 12.dp),
