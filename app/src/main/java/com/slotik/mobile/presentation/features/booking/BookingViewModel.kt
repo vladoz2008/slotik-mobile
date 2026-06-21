@@ -8,7 +8,8 @@ import com.slotik.mobile.data.repository.PersistentSlotikRepository
 import com.slotik.mobile.domain.model.AvailabilitySlot
 import com.slotik.mobile.domain.model.Booking
 import com.slotik.mobile.domain.model.Specialist
-import com.slotik.mobile.domain.repository.SlotikRepository
+import com.slotik.mobile.domain.usecase.CreateBookingUseCase
+import com.slotik.mobile.domain.usecase.ObserveAppStateUseCase
 import com.slotik.mobile.domain.util.BookingValidator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -39,13 +40,14 @@ private data class BookingTransientState(
 )
 
 class BookingViewModel(
-    private val repository: SlotikRepository,
+    private val observeAppState: ObserveAppStateUseCase,
+    private val createBookingUseCase: CreateBookingUseCase,
 ) : ViewModel() {
 
     private val transient = MutableStateFlow(BookingTransientState())
 
     val state: StateFlow<BookingUiState> = combine(
-        repository.state,
+        observeAppState(),
         transient,
     ) { repoState, t ->
         val specialist = repoState.specialists.firstOrNull { it.id == t.selectedSpecialistId }
@@ -91,7 +93,7 @@ class BookingViewModel(
         if (!current.canConfirm) return
 
         viewModelScope.launch {
-            val booking = repository.createBooking(
+            val booking = createBookingUseCase(
                 specialistId = specialist.id,
                 slotId = slot.id,
                 comment = current.comment,
@@ -106,8 +108,13 @@ class BookingViewModel(
     companion object {
         fun factory(context: Context): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                BookingViewModel(PersistentSlotikRepository.getInstance(context)) as T
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val repository = PersistentSlotikRepository.getInstance(context)
+                return BookingViewModel(
+                    ObserveAppStateUseCase(repository),
+                    CreateBookingUseCase(repository),
+                ) as T
+            }
         }
     }
 }

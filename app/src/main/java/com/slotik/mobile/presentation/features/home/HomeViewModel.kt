@@ -9,7 +9,7 @@ import com.slotik.mobile.domain.model.Booking
 import com.slotik.mobile.domain.model.BookingStatus
 import com.slotik.mobile.domain.model.ServiceCategory
 import com.slotik.mobile.domain.model.Specialist
-import com.slotik.mobile.domain.repository.SlotikRepository
+import com.slotik.mobile.domain.usecase.ObserveAppStateUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -19,30 +19,33 @@ data class HomeUiState(
     val categories: List<ServiceCategory> = emptyList(),
     val featuredSpecialists: List<Specialist> = emptyList(),
     val nextBooking: Booking? = null,
+    val userFirstName: String = "",
 )
 
 class HomeViewModel(
-    private val repository: SlotikRepository,
+    private val observeAppState: ObserveAppStateUseCase,
 ) : ViewModel() {
 
-    val state: StateFlow<HomeUiState> = repository.state.map { repoState ->
+    val state: StateFlow<HomeUiState> = observeAppState().map { repoState ->
         HomeUiState(
             categories = repoState.categories,
             featuredSpecialists = repoState.specialists.take(2),
             nextBooking = repoState.currentBookings
                 .filter { it.status == BookingStatus.CONFIRMED }
                 .minByOrNull { it.date.atTime(it.startTime) },
+            userFirstName = repoState.userProfile.firstName,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = with(repository.state.value) {
+        initialValue = with(observeAppState().value) {
             HomeUiState(
                 categories = categories,
                 featuredSpecialists = specialists.take(2),
                 nextBooking = currentBookings
                     .filter { it.status == BookingStatus.CONFIRMED }
                     .minByOrNull { it.date.atTime(it.startTime) },
+                userFirstName = userProfile.firstName,
             )
         },
     )
@@ -50,8 +53,10 @@ class HomeViewModel(
     companion object {
         fun factory(context: Context): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                HomeViewModel(PersistentSlotikRepository.getInstance(context)) as T
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val repository = PersistentSlotikRepository.getInstance(context)
+                return HomeViewModel(ObserveAppStateUseCase(repository)) as T
+            }
         }
     }
 }

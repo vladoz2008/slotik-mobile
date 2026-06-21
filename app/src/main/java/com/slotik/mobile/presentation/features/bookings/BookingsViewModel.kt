@@ -8,7 +8,9 @@ import com.slotik.mobile.data.repository.PersistentSlotikRepository
 import com.slotik.mobile.domain.model.Booking
 import com.slotik.mobile.domain.model.ProfileSection
 import com.slotik.mobile.domain.model.Specialist
-import com.slotik.mobile.domain.repository.SlotikRepository
+import com.slotik.mobile.domain.model.UserProfile
+import com.slotik.mobile.domain.usecase.CancelBookingUseCase
+import com.slotik.mobile.domain.usecase.ObserveAppStateUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,16 +23,18 @@ data class BookingsUiState(
     val bookingHistory: List<Booking> = emptyList(),
     val favoriteSpecialists: List<Specialist> = emptyList(),
     val activeSection: ProfileSection = ProfileSection.BOOKINGS,
+    val userProfile: UserProfile? = null,
 )
 
 class BookingsViewModel(
-    private val repository: SlotikRepository,
+    private val observeAppState: ObserveAppStateUseCase,
+    private val cancelBookingUseCase: CancelBookingUseCase,
 ) : ViewModel() {
 
     private val activeSection = MutableStateFlow(ProfileSection.BOOKINGS)
 
     val state: StateFlow<BookingsUiState> = combine(
-        repository.state,
+        observeAppState(),
         activeSection,
     ) { repoState, section ->
         BookingsUiState(
@@ -40,15 +44,17 @@ class BookingsViewModel(
                 it.id in repoState.favoriteSpecialistIds
             },
             activeSection = section,
+            userProfile = repoState.userProfile,
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = with(repository.state.value) {
+        initialValue = with(observeAppState().value) {
             BookingsUiState(
                 currentBookings = currentBookings,
                 bookingHistory = bookingHistory,
                 favoriteSpecialists = specialists.filter { it.id in favoriteSpecialistIds },
+                userProfile = userProfile,
             )
         },
     )
@@ -58,14 +64,19 @@ class BookingsViewModel(
     }
 
     fun cancelBooking(bookingId: String) {
-        viewModelScope.launch { repository.cancelBooking(bookingId) }
+        viewModelScope.launch { cancelBookingUseCase(bookingId) }
     }
 
     companion object {
         fun factory(context: Context): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                BookingsViewModel(PersistentSlotikRepository.getInstance(context)) as T
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val repository = PersistentSlotikRepository.getInstance(context)
+                return BookingsViewModel(
+                    ObserveAppStateUseCase(repository),
+                    CancelBookingUseCase(repository),
+                ) as T
+            }
         }
     }
 }

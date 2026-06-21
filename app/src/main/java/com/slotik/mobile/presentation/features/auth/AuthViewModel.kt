@@ -6,7 +6,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.slotik.mobile.data.repository.PersistentSlotikRepository
 import com.slotik.mobile.domain.model.AuthMode
-import com.slotik.mobile.domain.repository.SlotikRepository
+import com.slotik.mobile.domain.usecase.CompleteOnboardingUseCase
+import com.slotik.mobile.domain.usecase.ObserveAppStateUseCase
+import com.slotik.mobile.domain.usecase.SignInUseCase
+import com.slotik.mobile.domain.usecase.SignOutUseCase
 import com.slotik.mobile.domain.util.Validator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,7 +31,10 @@ data class AuthUiState(
 }
 
 class AuthViewModel(
-    private val repository: SlotikRepository,
+    private val observeAppState: ObserveAppStateUseCase,
+    private val completeOnboardingUseCase: CompleteOnboardingUseCase,
+    private val signInUseCase: SignInUseCase,
+    private val signOutUseCase: SignOutUseCase,
 ) : ViewModel() {
 
     private val transient = MutableStateFlow(
@@ -36,7 +42,7 @@ class AuthViewModel(
     )
 
     val state: StateFlow<AuthUiState> = combine(
-        repository.state,
+        observeAppState(),
         transient,
     ) { repoState, (mode, email, password) ->
         AuthUiState(
@@ -50,13 +56,13 @@ class AuthViewModel(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = AuthUiState(
-            onboardingCompleted = repository.state.value.onboardingCompleted,
-            isAuthorized = repository.state.value.isAuthorized,
+            onboardingCompleted = observeAppState().value.onboardingCompleted,
+            isAuthorized = observeAppState().value.isAuthorized,
         ),
     )
 
     fun completeOnboarding() {
-        viewModelScope.launch { repository.completeOnboarding() }
+        viewModelScope.launch { completeOnboardingUseCase() }
     }
 
     fun updateAuthMode(mode: AuthMode) {
@@ -73,12 +79,12 @@ class AuthViewModel(
 
     fun submit() {
         if (!state.value.canSubmit) return
-        viewModelScope.launch { repository.signIn() }
+        viewModelScope.launch { signInUseCase() }
     }
 
     fun signOut() {
         viewModelScope.launch {
-            repository.signOut()
+            signOutUseCase()
             transient.value = Triple(AuthMode.LOGIN, "", "")
         }
     }
@@ -86,8 +92,15 @@ class AuthViewModel(
     companion object {
         fun factory(context: Context): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                AuthViewModel(PersistentSlotikRepository.getInstance(context)) as T
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val repository = PersistentSlotikRepository.getInstance(context)
+                return AuthViewModel(
+                    ObserveAppStateUseCase(repository),
+                    CompleteOnboardingUseCase(repository),
+                    SignInUseCase(repository),
+                    SignOutUseCase(repository),
+                ) as T
+            }
         }
     }
 }
