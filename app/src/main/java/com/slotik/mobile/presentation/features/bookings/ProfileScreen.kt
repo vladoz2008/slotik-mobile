@@ -3,7 +3,6 @@ package com.slotik.mobile.presentation.features.bookings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.slotik.mobile.domain.model.Booking
 import com.slotik.mobile.domain.model.BookingStatus
@@ -77,9 +77,20 @@ fun ProfileScreen(
         }
         Spacer(modifier = Modifier.height(24.dp))
 
+        // BUG-01 fix: always render both tabs at the same height so the row never jumps.
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            ProfileTab("Мои записи", section == ProfileSection.BOOKINGS) { onSectionChange(ProfileSection.BOOKINGS) }
-            ProfileTab("Избранное", section == ProfileSection.FAVORITES) { onSectionChange(ProfileSection.FAVORITES) }
+            ProfileTab(
+                text = "Мои записи",
+                selected = section == ProfileSection.BOOKINGS,
+                modifier = Modifier.weight(1f),
+                onClick = { onSectionChange(ProfileSection.BOOKINGS) },
+            )
+            ProfileTab(
+                text = "Избранное",
+                selected = section == ProfileSection.FAVORITES,
+                modifier = Modifier.weight(1f),
+                onClick = { onSectionChange(ProfileSection.FAVORITES) },
+            )
         }
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -118,14 +129,17 @@ fun ProfileScreen(
     }
 }
 
+// BUG-01 fix: indicator Surface is always rendered (height = 2.dp), only color changes.
+// This prevents the row from changing height when switching tabs.
 @Composable
 private fun ProfileTab(
     text: String,
     selected: Boolean,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     Column(
-        modifier = Modifier.clickable(onClick = onClick),
+        modifier = modifier.clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
@@ -134,12 +148,14 @@ private fun ProfileTab(
             color = if (selected) SlotikPrimary else SlotikTextSecondary,
         )
         Spacer(modifier = Modifier.height(10.dp))
-        if (selected) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(0.8f).height(2.dp),
-                color = SlotikPrimary,
-            ) {}
-        }
+        // Always render the 2dp underline — transparent when not selected.
+        // This keeps the tab row height stable across state changes.
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .height(2.dp),
+            color = if (selected) SlotikPrimary else Color.Transparent,
+        ) {}
     }
 }
 
