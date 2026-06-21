@@ -78,6 +78,15 @@ data class Booking(
     val comment: String,
 )
 
+data class UserProfile(
+    val id: String,
+    val fullName: String,
+    val firstName: String,
+    val email: String,
+    val phone: String,
+    val memberSince: String,
+)
+
 data class SlotikRepositoryState(
     val onboardingCompleted: Boolean,
     val isAuthorized: Boolean,
@@ -87,4 +96,5 @@ data class SlotikRepositoryState(
     val currentBookings: List<Booking>,
     val bookingHistory: List<Booking>,
     val favoriteSpecialistIds: Set<String>,
+    val userProfile: UserProfile,
 )

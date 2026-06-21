@@ -10,6 +10,7 @@ import com.slotik.mobile.domain.model.CategoryAccent
 import com.slotik.mobile.domain.model.ServiceCategory
 import com.slotik.mobile.domain.model.SlotPeriod
 import com.slotik.mobile.domain.model.SlotikRepositoryState
+import com.slotik.mobile.domain.model.UserProfile
 import com.slotik.mobile.domain.model.Specialist
 import com.slotik.mobile.domain.repository.SlotikRepository
 import java.time.LocalDate
@@ -74,6 +75,15 @@ class PersistentSlotikRepository private constructor(
             experienceLabel = "Стаж 8 лет",
             categoryId = "beauty",
         ),
+    )
+
+    private val userProfile = UserProfile(
+        id = "user-alexey",
+        fullName = "Алексей Смирнов",
+        firstName = "Алексей",
+        email = "alexey.smirnov@example.com",
+        phone = "+7 (999) 123-45-67",
+        memberSince = "С нами с 2024 года",
     )
 
     private val staticHistory = listOf(
@@ -229,6 +239,7 @@ class PersistentSlotikRepository private constructor(
             currentBookings = snapshot.bookings.sortedBy { it.date.atTime(it.startTime) },
             bookingHistory = staticHistory,
             favoriteSpecialistIds = snapshot.favorites.ifEmpty { setOf("mikhail-ivanov") },
+            userProfile = userProfile,
         )
     }
 
