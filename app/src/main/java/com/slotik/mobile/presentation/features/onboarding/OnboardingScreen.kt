@@ -21,11 +21,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.slotik.mobile.presentation.components.SlotikPrimaryButton
 import com.slotik.mobile.presentation.theme.SlotikBackground
 import com.slotik.mobile.presentation.theme.SlotikPrimary
+import com.slotik.mobile.presentation.theme.SlotikPrimaryDark
 import com.slotik.mobile.presentation.theme.SlotikPrimaryLight
 import com.slotik.mobile.presentation.theme.SlotikSurface
 import com.slotik.mobile.presentation.theme.SlotikTextPrimary
@@ -39,62 +44,72 @@ fun OnboardingScreen(
         modifier = Modifier
             .background(SlotikBackground)
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 32.dp),
+            .padding(horizontal = 20.dp, vertical = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(modifier = Modifier.height(48.dp))
 
-        Surface(
-            shape = RoundedCornerShape(32.dp),
-            color = SlotikSurface,
-            shadowElevation = 16.dp,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Box(
-                modifier = Modifier
-                    .height(320.dp)
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(SlotikPrimaryLight, SlotikSurface),
-                        ),
+        // Иллюстративная карточка с мягкой тенью и градиентным фоном
+        Box(
+            modifier = Modifier
+                .shadow(
+                    elevation = 18.dp,
+                    shape = RoundedCornerShape(32.dp),
+                    ambientColor = SlotikPrimary.copy(alpha = 0.18f),
+                    spotColor = SlotikPrimary.copy(alpha = 0.22f),
+                )
+                .clip(RoundedCornerShape(32.dp))
+                .fillMaxWidth()
+                .height(300.dp)
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(SlotikPrimaryLight, SlotikSurface),
                     ),
-                contentAlignment = Alignment.Center,
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Surface(
+                color = SlotikPrimary.copy(alpha = 0.10f),
+                shape = CircleShape,
+                modifier = Modifier.size(160.dp),
             ) {
-                Surface(
-                    color = SlotikPrimary.copy(alpha = 0.12f),
-                    shape = CircleShape,
-                    modifier = Modifier.size(164.dp),
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Rounded.People,
-                            contentDescription = null,
-                            tint = SlotikPrimary,
-                            modifier = Modifier.size(82.dp),
-                        )
-                    }
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Rounded.People,
+                        contentDescription = null,
+                        tint = SlotikPrimary,
+                        modifier = Modifier.size(84.dp),
+                    )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(44.dp))
         Text(
             text = "Быстрая запись\nк специалистам",
             style = MaterialTheme.typography.displaySmall,
             color = SlotikTextPrimary,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
         )
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(14.dp))
         Text(
             text = "Забронируйте удобное время всего в\nнесколько кликов без лишних звонков.",
             style = MaterialTheme.typography.bodyLarge,
             color = SlotikTextSecondary,
+            textAlign = TextAlign.Center,
         )
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Индикатор страниц с градиентной активной точкой
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Box(
                 modifier = Modifier
-                    .size(width = 32.dp, height = 8.dp)
-                    .background(SlotikPrimary, RoundedCornerShape(999.dp)),
+                    .size(width = 28.dp, height = 8.dp)
+                    .background(
+                        Brush.linearGradient(listOf(SlotikPrimary, SlotikPrimaryDark)),
+                        RoundedCornerShape(999.dp),
+                    ),
             )
             repeat(2) {
                 Box(
@@ -104,7 +119,7 @@ fun OnboardingScreen(
                 )
             }
         }
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(36.dp))
         SlotikPrimaryButton(
             text = "Далее",
             onClick = onContinue,

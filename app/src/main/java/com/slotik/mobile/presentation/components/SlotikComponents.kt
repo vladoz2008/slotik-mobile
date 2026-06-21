@@ -1,6 +1,7 @@
 package com.slotik.mobile.presentation.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,13 +38,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.slotik.mobile.presentation.navigation.SlotikDestination
+import com.slotik.mobile.presentation.theme.SlotikAvatarGradientStart
 import com.slotik.mobile.presentation.theme.SlotikBackground
 import com.slotik.mobile.presentation.theme.SlotikDivider
 import com.slotik.mobile.presentation.theme.SlotikPrimary
+import com.slotik.mobile.presentation.theme.SlotikPrimaryDark
 import com.slotik.mobile.presentation.theme.SlotikPrimaryLight
 import com.slotik.mobile.presentation.theme.SlotikSurface
 import com.slotik.mobile.presentation.theme.SlotikTextPrimary
@@ -57,7 +62,7 @@ data class SlotikBottomItem(
 @Composable
 fun SlotikScreenContainer(
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(16.dp),
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
     bottomBar: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -91,7 +96,7 @@ fun SlotikTopBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 16.dp),
+            .padding(top = 10.dp, bottom = 18.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -99,7 +104,7 @@ fun SlotikTopBar(
             if (showBack) {
                 Surface(
                     shape = CircleShape,
-                    color = Color.Transparent,
+                    color = SlotikPrimaryLight.copy(alpha = 0.7f),
                     modifier = Modifier
                         .size(40.dp)
                         .clip(CircleShape)
@@ -110,11 +115,12 @@ fun SlotikTopBar(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = "Назад",
                             tint = SlotikPrimary,
+                            modifier = Modifier.size(20.dp),
                         )
                     }
                 }
             }
-            Column(modifier = Modifier.padding(start = if (showBack) 4.dp else 0.dp)) {
+            Column(modifier = Modifier.padding(start = if (showBack) 10.dp else 0.dp)) {
                 if (subtitle != null) {
                     Text(
                         text = subtitle,
@@ -126,6 +132,7 @@ fun SlotikTopBar(
                     text = title,
                     style = MaterialTheme.typography.headlineMedium,
                     color = SlotikTextPrimary,
+                    fontWeight = FontWeight.SemiBold,
                 )
             }
         }
@@ -140,25 +147,34 @@ fun SlotikPrimaryButton(
     enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
-    Surface(
+    val gradient = Brush.linearGradient(
+        colors = if (enabled) {
+            listOf(SlotikPrimary, SlotikPrimaryDark)
+        } else {
+            listOf(SlotikPrimary.copy(alpha = 0.38f), SlotikPrimaryDark.copy(alpha = 0.38f))
+        },
+    )
+    Box(
         modifier = modifier
-            .clip(RoundedCornerShape(18.dp))
-            .clickable(enabled = enabled, onClick = onClick),
-        color = if (enabled) SlotikPrimary else SlotikPrimary.copy(alpha = 0.45f),
-        shadowElevation = 8.dp,
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 18.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Text(
-                text = text,
-                color = SlotikSurface,
-                style = MaterialTheme.typography.labelLarge,
+            .shadow(
+                elevation = if (enabled) 6.dp else 0.dp,
+                shape = RoundedCornerShape(18.dp),
+                ambientColor = SlotikPrimary.copy(alpha = 0.25f),
+                spotColor = SlotikPrimary.copy(alpha = 0.35f),
             )
-        }
+            .clip(RoundedCornerShape(18.dp))
+            .background(gradient)
+            .clickable(enabled = enabled, onClick = onClick)
+            .fillMaxWidth()
+            .padding(vertical = 18.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            color = SlotikSurface,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Bold,
+        )
     }
 }
 
@@ -177,6 +193,7 @@ fun SlotikSectionTitle(
             text = title,
             style = MaterialTheme.typography.titleLarge,
             color = SlotikTextPrimary,
+            fontWeight = FontWeight.SemiBold,
         )
         if (actionLabel != null && onActionClick != null) {
             Text(
@@ -195,11 +212,20 @@ fun SlotikAvatar(
     modifier: Modifier = Modifier,
     accent: Color = SlotikPrimaryLight,
 ) {
+    val gradientBrush = Brush.radialGradient(
+        colors = listOf(SlotikAvatarGradientStart, accent),
+    )
     Box(
         modifier = modifier
             .size(56.dp)
+            .shadow(
+                elevation = 2.dp,
+                shape = CircleShape,
+                ambientColor = SlotikPrimary.copy(alpha = 0.12f),
+                spotColor = SlotikPrimary.copy(alpha = 0.12f),
+            )
             .clip(CircleShape)
-            .background(accent),
+            .background(gradientBrush),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -227,7 +253,8 @@ fun SlotikInfoChip(
             text = text,
             color = contentColor,
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
         )
     }
 }
@@ -246,18 +273,26 @@ fun SlotikBottomBar(
 
     NavigationBar(
         containerColor = SlotikSurface,
-        tonalElevation = 8.dp,
+        tonalElevation = 0.dp,
+        modifier = Modifier
+            .shadow(
+                elevation = 12.dp,
+                shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+                ambientColor = Color.Black.copy(alpha = 0.08f),
+                spotColor = Color.Black.copy(alpha = 0.08f),
+            ),
     ) {
         items.forEach { item ->
+            val isSelected = currentDestination == item.destination
             NavigationBarItem(
-                selected = currentDestination == item.destination,
+                selected = isSelected,
                 onClick = { onNavigate(item.destination) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = SlotikPrimary,
                     selectedTextColor = SlotikPrimary,
                     indicatorColor = SlotikPrimaryLight,
-                    unselectedIconColor = SlotikTextSecondary,
-                    unselectedTextColor = SlotikTextSecondary,
+                    unselectedIconColor = SlotikTextSecondary.copy(alpha = 0.7f),
+                    unselectedTextColor = SlotikTextSecondary.copy(alpha = 0.7f),
                 ),
                 icon = {
                     Icon(
@@ -272,7 +307,13 @@ fun SlotikBottomBar(
                         contentDescription = item.label,
                     )
                 },
-                label = { Text(item.label) },
+                label = {
+                    Text(
+                        text = item.label,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                    )
+                },
             )
         }
     }
@@ -284,13 +325,20 @@ fun SlotikCard(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 3.dp,
+                shape = RoundedCornerShape(22.dp),
+                ambientColor = Color.Black.copy(alpha = 0.06f),
+                spotColor = Color.Black.copy(alpha = 0.06f),
+            ),
         colors = CardDefaults.cardColors(containerColor = SlotikSurface),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(22.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(18.dp),
             content = content,
         )
     }

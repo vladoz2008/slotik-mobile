@@ -25,13 +25,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.slotik.mobile.domain.model.AuthMode
 import com.slotik.mobile.presentation.components.SlotikPrimaryButton
 import com.slotik.mobile.presentation.theme.SlotikBackground
 import com.slotik.mobile.presentation.theme.SlotikDivider
 import com.slotik.mobile.presentation.theme.SlotikPrimary
+import com.slotik.mobile.presentation.theme.SlotikPrimaryDark
 import com.slotik.mobile.presentation.theme.SlotikPrimaryLight
 import com.slotik.mobile.presentation.theme.SlotikSurface
 import com.slotik.mobile.presentation.theme.SlotikTextPrimary
@@ -52,28 +57,43 @@ fun AuthScreen(
         modifier = Modifier
             .background(SlotikBackground)
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 40.dp),
+            .padding(horizontal = 20.dp, vertical = 40.dp),
     ) {
         Spacer(modifier = Modifier.height(24.dp))
-        Surface(
-            shape = RoundedCornerShape(20.dp),
-            color = SlotikPrimary,
+
+        // Лого-иконка с градиентным фоном
+        Box(
             modifier = Modifier
-                .size(64.dp)
+                .size(68.dp)
+                .shadow(
+                    elevation = 10.dp,
+                    shape = RoundedCornerShape(22.dp),
+                    ambientColor = SlotikPrimary.copy(alpha = 0.22f),
+                    spotColor = SlotikPrimary.copy(alpha = 0.3f),
+                )
+                .clip(RoundedCornerShape(22.dp))
+                .background(
+                    Brush.linearGradient(listOf(SlotikPrimary, SlotikPrimaryDark)),
+                )
                 .align(Alignment.CenterHorizontally),
+            contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = Icons.Rounded.AccountCircle,
                 contentDescription = null,
                 tint = SlotikSurface,
-                modifier = Modifier.padding(14.dp),
+                modifier = Modifier
+                    .padding(14.dp)
+                    .size(40.dp),
             )
         }
-        Spacer(modifier = Modifier.height(20.dp))
+
+        Spacer(modifier = Modifier.height(22.dp))
         Text(
             text = "Добро пожаловать",
             style = MaterialTheme.typography.headlineMedium,
             color = SlotikTextPrimary,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier.align(Alignment.CenterHorizontally),
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -84,10 +104,12 @@ fun AuthScreen(
             modifier = Modifier.align(Alignment.CenterHorizontally),
         )
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(30.dp))
+
+        // Переключатель режима
         Surface(
             color = SlotikDivider,
-            shape = RoundedCornerShape(16.dp),
+            shape = RoundedCornerShape(18.dp),
             modifier = Modifier.fillMaxWidth(),
         ) {
             Row(modifier = Modifier.padding(4.dp)) {
@@ -106,11 +128,11 @@ fun AuthScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(22.dp))
         OutlinedTextField(
             value = email,
             onValueChange = onEmailChange,
-            leadingIcon = { Icon(Icons.Outlined.Email, contentDescription = null) },
+            leadingIcon = { Icon(Icons.Outlined.Email, contentDescription = null, tint = SlotikPrimary) },
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Email или телефон") },
             singleLine = true,
@@ -120,8 +142,8 @@ fun AuthScreen(
         OutlinedTextField(
             value = password,
             onValueChange = onPasswordChange,
-            leadingIcon = { Icon(Icons.Outlined.Lock, contentDescription = null) },
-            trailingIcon = { Icon(Icons.Rounded.VisibilityOff, contentDescription = null) },
+            leadingIcon = { Icon(Icons.Outlined.Lock, contentDescription = null, tint = SlotikPrimary) },
+            trailingIcon = { Icon(Icons.Rounded.VisibilityOff, contentDescription = null, tint = SlotikTextSecondary) },
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Пароль") },
             singleLine = true,
@@ -132,9 +154,10 @@ fun AuthScreen(
             text = "Забыли пароль?",
             color = SlotikPrimary,
             style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.SemiBold,
             modifier = Modifier.align(Alignment.End),
         )
-        Spacer(modifier = Modifier.height(18.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         SlotikPrimaryButton(
             text = if (authMode == AuthMode.LOGIN) "Войти" else "Создать аккаунт",
             enabled = canSubmit,
@@ -154,8 +177,7 @@ fun AuthScreen(
         }
         Spacer(modifier = Modifier.height(18.dp))
 
-        // BUG-03 fix: social buttons now use consistent icon badges instead of
-        // a bare "A" text or a floating empty circle.
+        // BUG-03 fix: social buttons — иконки-бейджи + лейблы, единый стиль
         SocialButton(label = "Продолжить с Google", iconLabel = "G")
         Spacer(modifier = Modifier.height(12.dp))
         SocialButton(label = "Продолжить с Apple", iconLabel = "⌘")
@@ -171,31 +193,33 @@ private fun AuthModeChip(
 ) {
     Surface(
         color = if (selected) SlotikSurface else Color.Transparent,
-        shape = RoundedCornerShape(12.dp),
-        shadowElevation = if (selected) 4.dp else 0.dp,
+        shape = RoundedCornerShape(14.dp),
+        shadowElevation = if (selected) 3.dp else 0.dp,
         modifier = modifier.clickable(onClick = onClick),
     ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelLarge,
-            color = if (selected) SlotikPrimary else SlotikTextSecondary,
-            modifier = Modifier.padding(vertical = 14.dp),
-        )
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelLarge,
+                color = if (selected) SlotikPrimary else SlotikTextSecondary,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                modifier = Modifier.padding(vertical = 14.dp),
+            )
+        }
     }
 }
 
-// BUG-03 fix: unified social button — always shows an icon badge + label,
-// never an empty circle or a bare single letter floating outside a container.
+// BUG-03 fix: unified social button — icon badge + label, consistent layout
 @Composable
 private fun SocialButton(
     label: String,
     iconLabel: String,
 ) {
     Surface(
-        color = Color.White,
+        color = SlotikSurface,
         shape = RoundedCornerShape(16.dp),
         tonalElevation = 0.dp,
-        shadowElevation = 2.dp,
+        shadowElevation = 3.dp,
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
@@ -206,15 +230,16 @@ private fun SocialButton(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Surface(
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(9.dp),
                 color = SlotikPrimaryLight,
-                modifier = Modifier.size(28.dp),
+                modifier = Modifier.size(30.dp),
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
                         text = iconLabel,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelLarge,
                         color = SlotikPrimary,
+                        fontWeight = FontWeight.Bold,
                     )
                 }
             }
@@ -222,6 +247,7 @@ private fun SocialButton(
                 text = label,
                 style = MaterialTheme.typography.bodyLarge,
                 color = SlotikTextPrimary,
+                fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(start = 12.dp),
             )
         }
