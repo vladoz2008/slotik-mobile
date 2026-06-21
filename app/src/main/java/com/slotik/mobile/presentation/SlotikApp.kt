@@ -93,23 +93,31 @@ private fun SlotikAuthenticatedApp(
                 categories = homeState.categories,
                 nextBooking = homeState.nextBooking,
                 featuredSpecialists = homeState.featuredSpecialists,
-                onOpenSearch = { navController.navigate(SlotikDestination.SPECIALISTS.route) },
+                onOpenSearch = {
+                    specialistsViewModel.selectCategory(null)
+                    navController.navigate(SlotikDestination.SPECIALISTS.route)
+                },
                 onOpenSpecialist = { specialistId ->
                     bookingViewModel.selectSpecialist(specialistId)
                     navController.navigate(SlotikDestination.SLOT_SELECTION.route)
                 },
                 onOpenBookingDetails = { navController.navigate(SlotikDestination.BOOKINGS.route) },
+                onOpenCategory = { categoryId ->
+                    specialistsViewModel.selectCategory(categoryId)
+                    navController.navigate(SlotikDestination.SPECIALISTS.route)
+                },
                 onNavigate = { destination ->
                     navController.navigate(destination.route) { launchSingleTop = true }
                 },
+                userFirstName = homeState.userFirstName,
             )
         }
 
         composable(SlotikDestination.SPECIALISTS.route) {
             if (specialistsState.filteredSpecialists.isEmpty()) {
                 EmptySpecialistsScreen(
-                    onBackToSearch = specialistsViewModel::clearSearchQuery,
-                    onResetFilters = specialistsViewModel::clearSearchQuery,
+                    onBackToSearch = specialistsViewModel::clearFilters,
+                    onResetFilters = specialistsViewModel::clearFilters,
                     onNavigate = { destination ->
                         navController.navigate(destination.route) { launchSingleTop = true }
                     },
@@ -180,6 +188,8 @@ private fun SlotikAuthenticatedApp(
                     navController.navigate(destination.route) { launchSingleTop = true }
                 },
                 onSignOut = onSignOut,
+                userName = bookingsState.userProfile?.fullName ?: "Пользователь",
+                userPhone = bookingsState.userProfile?.phone ?: "",
             )
         }
 
@@ -200,6 +210,8 @@ private fun SlotikAuthenticatedApp(
                     navController.navigate(destination.route) { launchSingleTop = true }
                 },
                 onSignOut = onSignOut,
+                userName = bookingsState.userProfile?.fullName ?: "Пользователь",
+                userPhone = bookingsState.userProfile?.phone ?: "",
             )
         }
     }
