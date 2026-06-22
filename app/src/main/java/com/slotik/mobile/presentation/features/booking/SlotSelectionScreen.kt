@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -61,7 +60,56 @@ fun SlotSelectionScreen(
 ) {
     if (specialist == null) return
 
-    SlotikScreenContainer {
+    SlotikScreenContainer(
+        bottomBar = {
+            // Нижняя панель с итогами (закреплена)
+            Surface(
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                color = SlotikSurface,
+                shadowElevation = 8.dp,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column {
+                            Text(
+                                "ИТОГО К ОПЛАТЕ",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = SlotikTextSecondary,
+                            )
+                            Text(
+                                "3 500 ₽",
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = SlotikTextPrimary,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text(
+                                selectedSlot?.let { DateTimeFormatters.dayFormatter.format(it.date) } ?: "--",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = SlotikTextSecondary,
+                            )
+                            Text(
+                                selectedSlot?.let {
+                                    "${DateTimeFormatters.timeFormatter.format(it.startTime)} – ${DateTimeFormatters.timeFormatter.format(it.endTime)}"
+                                } ?: "--:--",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = SlotikTextPrimary,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SlotikPrimaryButton(text = "Записаться", onClick = onContinue)
+                }
+            }
+        },
+    ) {
         SlotikTopBar(title = "Выбор времени", showBack = true, onBack = onBack)
 
         // Карточка специалиста
@@ -247,54 +295,6 @@ fun SlotSelectionScreen(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
-        Spacer(modifier = Modifier.height(18.dp))
-
-        // Нижняя панель с итогами
-        Surface(
-            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-            color = SlotikSurface,
-            shadowElevation = 8.dp,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column {
-                        Text(
-                            "ИТОГО К ОПЛАТЕ",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = SlotikTextSecondary,
-                        )
-                        Text(
-                            "3 500 ₽",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = SlotikTextPrimary,
-                            fontWeight = FontWeight.Bold,
-                        )
-                    }
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text(
-                            selectedSlot?.let { DateTimeFormatters.dayFormatter.format(it.date) } ?: "--",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = SlotikTextSecondary,
-                        )
-                        Text(
-                            selectedSlot?.let {
-                                "${DateTimeFormatters.timeFormatter.format(it.startTime)} – ${DateTimeFormatters.timeFormatter.format(it.endTime)}"
-                            } ?: "--:--",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = SlotikTextPrimary,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                SlotikPrimaryButton(text = "Записаться", onClick = onContinue)
-            }
-        }
     }
 }
 

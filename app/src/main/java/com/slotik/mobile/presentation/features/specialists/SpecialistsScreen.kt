@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Favorite
@@ -93,8 +91,8 @@ fun SpecialistsScreen(
         }
         Spacer(modifier = Modifier.height(18.dp))
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(specialists, key = { it.id }) { specialist ->
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            specialists.forEach { specialist ->
                 SpecialistCard(
                     specialist = specialist,
                     isFavorite = specialist.id in favoriteIds,

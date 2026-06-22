@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Logout
@@ -163,8 +161,8 @@ fun ProfileScreen(
 
         when (section) {
             ProfileSection.BOOKINGS -> {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(currentBookings + bookingHistory, key = { it.id }) { booking ->
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    (currentBookings + bookingHistory).forEach { booking ->
                         BookingCard(
                             booking = booking,
                             onCancelBooking = onCancelBooking,
@@ -173,8 +171,8 @@ fun ProfileScreen(
                 }
             }
             ProfileSection.FAVORITES -> {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(favoriteSpecialists, key = { it.id }) { specialist ->
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    favoriteSpecialists.forEach { specialist ->
                         SlotikCard(modifier = Modifier.clickable { onOpenSpecialist(specialist.id) }) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 SlotikAvatar(label = specialist.name, accent = SlotikSky)

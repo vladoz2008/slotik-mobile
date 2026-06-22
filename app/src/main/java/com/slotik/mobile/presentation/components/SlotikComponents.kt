@@ -3,6 +3,8 @@ package com.slotik.mobile.presentation.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,6 +65,7 @@ data class SlotikBottomItem(
 fun SlotikScreenContainer(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+    scrollable: Boolean = true,
     bottomBar: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -76,8 +79,8 @@ fun SlotikScreenContainer(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .fillMaxWidth()
                 .padding(innerPadding)
+                .then(if (scrollable) Modifier.verticalScroll(rememberScrollState()) else Modifier)
                 .padding(contentPadding),
             content = content,
         )
