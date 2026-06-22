@@ -1,5 +1,6 @@
 package com.slotik.mobile.presentation.features.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -7,11 +8,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.res.painterResource
+import com.slotik.mobile.R
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
@@ -56,37 +62,19 @@ fun AuthScreen(
     Column(
         modifier = Modifier
             .background(SlotikBackground)
-            .fillMaxWidth()
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 40.dp),
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Лого-иконка с градиентным фоном
-        Box(
+        Image(
+            painter = painterResource(R.drawable.ic_slotik_logo),
+            contentDescription = "Слотик",
             modifier = Modifier
-                .size(68.dp)
-                .shadow(
-                    elevation = 10.dp,
-                    shape = RoundedCornerShape(22.dp),
-                    ambientColor = SlotikPrimary.copy(alpha = 0.22f),
-                    spotColor = SlotikPrimary.copy(alpha = 0.3f),
-                )
-                .clip(RoundedCornerShape(22.dp))
-                .background(
-                    Brush.linearGradient(listOf(SlotikPrimary, SlotikPrimaryDark)),
-                )
+                .size(84.dp)
                 .align(Alignment.CenterHorizontally),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.AccountCircle,
-                contentDescription = null,
-                tint = SlotikSurface,
-                modifier = Modifier
-                    .padding(14.dp)
-                    .size(40.dp),
-            )
-        }
+        )
 
         Spacer(modifier = Modifier.height(22.dp))
         Text(

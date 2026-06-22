@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="100dp"
+    android:height="100dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <path
+        android:fillColor="#7C3AED"
+        android:fillAlpha="0.2"
+        android:pathData="M15,92 a35,4 0 1,0 70,0 a35,4 0 1,0 -70,0 z" />
+    <path
+        android:fillColor="#6B21A8"
+        android:pathData="M8,48 a42,42 0 1,0 84,0 a42,42 0 1,0 -84,0 z" />
+    <path android:pathData="M8,46 a42,42 0 1,0 84,0 a42,42 0 1,0 -84,0 z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="8"
+                android:startY="4"
+                android:endX="92"
+                android:endY="88">
+                <item android:offset="0" android:color="#A855F7" />
+                <item android:offset="1" android:color="#7C3AED" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <path
+        android:fillColor="#FFFFFF"
+        android:fillAlpha="0.3"
+        android:pathData="M23,35 a15,12 0 1,0 30,0 a15,12 0 1,0 -30,0 z" />
+    <path
+        android:fillColor="#E0E0E0"
+        android:pathData="M38,28 h24 a8,8 0 0,1 8,8 v24 a8,8 0 0,1 -8,8 h-24 a8,8 0 0,1 -8,-8 v-24 a8,8 0 0,1 8,-8 z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M37,27 h24 a8,8 0 0,1 8,8 v24 a8,8 0 0,1 -8,8 h-24 a8,8 0 0,1 -8,-8 v-24 a8,8 0 0,1 8,-8 z" />
+    <path
+        android:strokeColor="#9333EA"
+        android:strokeWidth="5"
+        android:strokeAlpha="0.3"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M37,48 L45,56 L61,38" />
+    <path
+        android:strokeColor="#7C3AED"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M37,46 L45,54 L61,36" />
+</vector>

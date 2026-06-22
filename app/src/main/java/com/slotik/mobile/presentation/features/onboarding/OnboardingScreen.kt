@@ -6,10 +6,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,9 +28,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.slotik.mobile.R
 import com.slotik.mobile.presentation.components.SlotikPrimaryButton
 import com.slotik.mobile.presentation.theme.SlotikBackground
 import com.slotik.mobile.presentation.theme.SlotikPrimary
@@ -43,7 +49,8 @@ fun OnboardingScreen(
     Column(
         modifier = Modifier
             .background(SlotikBackground)
-            .fillMaxWidth()
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -68,20 +75,11 @@ fun OnboardingScreen(
                 ),
             contentAlignment = Alignment.Center,
         ) {
-            Surface(
-                color = SlotikPrimary.copy(alpha = 0.10f),
-                shape = CircleShape,
-                modifier = Modifier.size(160.dp),
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Rounded.People,
-                        contentDescription = null,
-                        tint = SlotikPrimary,
-                        modifier = Modifier.size(84.dp),
-                    )
-                }
-            }
+            Image(
+                painter = painterResource(R.drawable.ic_slotik_logo),
+                contentDescription = "Слотик",
+                modifier = Modifier.size(180.dp),
+            )
         }
 
         Spacer(modifier = Modifier.height(44.dp))

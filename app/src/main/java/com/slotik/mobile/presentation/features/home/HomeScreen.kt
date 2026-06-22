@@ -1,5 +1,6 @@
 package com.slotik.mobile.presentation.features.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,8 +36,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.slotik.mobile.R
 import com.slotik.mobile.domain.model.Booking
 import com.slotik.mobile.domain.model.CategoryAccent
 import com.slotik.mobile.domain.model.ServiceCategory
@@ -81,6 +84,26 @@ fun HomeScreen(
             )
         },
     ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Image(
+                painter = painterResource(R.drawable.ic_slotik_logo),
+                contentDescription = "Слотик",
+                modifier = Modifier.size(34.dp),
+            )
+            Text(
+                text = "Слотик",
+                style = MaterialTheme.typography.titleLarge,
+                color = SlotikPrimary,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 10.dp),
+            )
+        }
+
         // Шапка с приветствием
         Row(
             modifier = Modifier
